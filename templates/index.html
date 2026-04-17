@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Advanced Calculator</title>
+
+<style>
+body {
+    margin: 0;
+    background: linear-gradient(to right, #5eead4, #c084fc);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.calculator {
+    width: 500px;
+    background: #1e293b;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.display {
+    color: white;
+    text-align: right;
+    padding: 20px 10px;
+}
+
+#expression {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+#result {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+button {
+    padding: 12px;
+    font-size: 15px;
+    border: none;
+    border-radius: 12px;
+    background: #334155;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #475569;
+}
+
+.operator {
+    background: #0f172a;
+}
+
+.equal {
+    background: linear-gradient(to bottom, #22d3ee, #14b8a6);
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="calculator">
+
+    <div class="display">
+        <div id="expression"></div>
+        <div id="result">0</div>
+    </div>
+
+
+    <!-- 🔥 BUTTONS -->
+    <div class="buttons">
+
+        <!-- 🔹 TOP ROW (BEST PLACE FOR GST + AC) -->
+        <!-- Scientific Row 1 -->
+<button class="operator">sin</button>
+<button class="operator">cos</button>
+<button class="operator">tan</button>
+<button class="operator">log</button>
+<button class="operator">√</button>
+<button class="operator">^</button>
+
+<!-- Scientific Row 2 -->
+<button class="operator">π</button>
+<button class="operator">e</button>
+<button class="operator">(</button>
+<button class="operator">)</button>
+<button class="operator">%</button>
+<button class="operator">AC</button>
+        <button class="operator">AC</button>
+        <button value="GST+5">GST+5%</button>
+<button value="GST+12">GST+12%</button>
+<button value="GST+18">GST+18%</button>
+<button value="GST+28">GST+28%</button>
+
+<button value="GST-5">GST-5%</button>
+<button value="GST-12">GST-12%</button>
+<button value="GST-18">GST-18%</button>
+<button value="GST-28">GST-28%</button>
+        <button class="operator">%</button>
+        <button class="operator">÷</button>
+        <button class="operator">×</button>
+        <button class="operator">+</button>
+        <button class="operator">-</button>
+        <button>1</button>
+        <button>2</button>
+        <button>3</button>
+
+
+
+        <button>4</button>
+        <button>5</button>
+        <button>6</button>
+
+
+        <button>7</button>
+        <button>8</button>
+        <button>9</button>
+
+
+        <button>0</button>
+        <button>.</button>
+        <button class="operator">DEL</button>
+        <button class="equal">=</button>
+
+    </div>
+
+</div>
+
+<script>
+let expression = "";
+
+const expDisplay = document.getElementById("expression");
+const resultDisplay = document.getElementById("result");
+
+function updateDisplay() {
+    expDisplay.innerText = expression;
+}
+
+document.querySelectorAll("button").forEach(button => {
+    button.addEventListener("click", () => {
+        let value = button.innerText;
+
+        // EQUAL
+        if (value === "=") {
+            try {
+                let exp = expression
+                    .replace(/÷/g, "/")
+                    .replace(/×/g, "*");
+
+                expression = eval(exp).toString();
+                resultDisplay.innerText = expression;
+                expDisplay.innerText = "";
+            } catch {
+                resultDisplay.innerText = "Error";
+            }
+        }
+
+        // DELETE
+        else if (value === "DEL") {
+            expression = expression.slice(0, -1);
+            updateDisplay();
+        }
+
+        // SCIENTIFIC FUNCTIONS
+else if (value === "sin") {
+    expression += "Math.sin(";
+}
+else if (value === "cos") {
+    expression += "Math.cos(";
+}
+else if (value === "tan") {
+    expression += "Math.tan(";
+}
+else if (value === "log") {
+    expression += "Math.log10(";
+}
+else if (value === "√") {
+    expression += "Math.sqrt(";
+}
+else if (value === "^") {
+    expression += "**";
+}
+else if (value === "π") {
+    expression += Math.PI;
+}
+else if (value === "e") {
+    expression += Math.E;
+}
+
+        // CLEAR ALL
+        else if (value === "AC") {
+            expression = "";
+            expDisplay.innerText = "";
+            resultDisplay.innerText = "0";
+        }
+
+        // GST ADD & REMOVE (ALL %)
+else if (value && value.includes("GST")) {
+    if (expression !== "") {
+
+        let amount;
+
+        // Safe eval (prevents crash)
+        try {
+            amount = eval(expression);
+        } catch (e) {
+            resultDisplay.innerText = "Error";
+            return;
+        }
+
+        // Extract GST % (works for GST+5, GST-18 etc.)
+        let gstPercent = parseFloat(value.replace("GST+", "").replace("GST-", ""));
+
+        let result;
+
+        if (value.includes("+")) {
+            result = amount + (amount * gstPercent / 100);
+            expDisplay.innerText = "GST " + gstPercent + "% Added";
+        } else {
+            result = amount / (1 + gstPercent / 100);
+            expDisplay.innerText = "GST " + gstPercent + "% Removed";
+        }
+
+        resultDisplay.innerText = "₹ " + result.toFixed(2);
+        expression = result.toString();
+    }
+}
+
+        // NORMAL INPUT
+        else {
+            expression += value;
+            updateDisplay();
+        }
+    });
+});
+</script>
+
+</body>
+</html>
